@@ -1,10 +1,14 @@
 // render.js
+import '@material/mwc-snackbar/mwc-snackbar.js';
 import DOMPurify from 'dompurify';
+import '@material/web/all.js';
+
 import { encrypt } from './encrypto';
 import { decrypt } from './decrypto';
+import logo from "./favicon.svg";
 import './style.css';
 
-const API_BASE = "https://https://secret-post.3ns76ymur.workers.dev/";
+const API_BASE = "https://secret-post.3ns76ymur.workers.dev";
 
 /** Base64URL 随机生成函数 */
 function base64url(bytes) {
@@ -26,44 +30,98 @@ async function run() {
         document.body.innerHTML = "";
         const title = document.createElement("h1");
         title.className = "title"
-        title.innerHTML = "<a href='/' style='color:white'>Secret Post</a>"
+        title.innerHTML = `<img class="logo" src="${logo}"/><a href='/' style='color:white'>Hieronymus's Secret Post</a>`
         document.body.appendChild(title);
 
-        const form = document.createElement("form");
+        const form = document.createElement("div");
         form.id = "form";
         form.innerHTML = `
-            <button>Send</button>
-            <select id="pasteExpiration" name="pasteExpiration">
-                <option value="86400000">1 day</option>
-                <option value="604800000" selected>1 week</option>
-                <option value="18144000000">1 month</option>
-                <option value="6622560000000">1 year</option>
-            </select>
-            <div class="form-group">
-                <input type="checkbox" name="burnAfterRead" id="burnAfterRead">
-                <label for="burnAfterRead">Burning after read</label>
+            <div class="intro" onmouseout="document.getElementById('intro-list').hidden=true" onmouseover="document.getElementById('intro-list').hidden=false">
+                <h3 id="usage-anchor">
+                    <span>Secret Post is a secure, zero-knowledge text sharing platform.</span>
+                    <md-filled-button id="ShowConfig">Send your Post</md-filled-button>
+                </h3>
+                <ol id="intro-list" hidden anchor="usage-anchor">
+                    <li slot="headline">No registration required: generate encrypted links instantly.</li>
+                    <li slot="headline">Set expiration times or enable burn-after-read.</li>
+                    <li slot="headline">Choose your own password or let us generate one for you.</li>
+                    <li slot="headline">Completely zero-knowledge: even the server cannot read your content.</li>
+                </ol>
             </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" name="password" id="password" autocomplete="new-password">
-            </div>
+
+            <md-dialog>
+                <div slot="headline">Config</div>
+                <div slot="content" id="config-form" method="dialog">
+                    <div class="form">
+                        <form class="dialog-config-form">
+                            <div class="form-element">
+                                <div style="display: flex;justify-content: space-between;">
+                                    <label style="padding-top:5px;padding-right:30px;">Burning after read:</label>
+                                    <md-switch type="checkbox" name="burnAfterRead" id="burnAfterRead"/>
+                                </div>
+                                <span></span>
+                            </div>
+
+                            <div class="form-element">
+                                <label>Expired At:</label>
+                                <md-outlined-select label="Expiration" name="pasteExpiration" style="margin-top:5px;">
+                                    <md-select-option value="86400000">
+                                        <div slot="headline">1 day</div>
+                                    </md-select-option>
+                                    <md-select-option value="604800000" selected>
+                                        <div slot="headline">1 week</div>
+                                    </md-select-option>
+                                    <md-select-option value="18144000000">
+                                        <div slot="headline">1 month</div>
+                                    </md-select-option>
+                                    <md-select-option value="6622560000000">
+                                        <div slot="headline">1 year</div>
+                                    </md-select-option>
+                                </md-outlined-select>
+                            </div>
+                            
+                            <div class="form-element" style="margin-bottom:37px;margin-top:15px">
+                                <label>Passwod (optinal)</label>
+                                <md-outlined-text-field label="password" type="password" name="password" id="password" autocomplete="new-password"/>
+                            </div>
+                        </form>
+                    </div>
+                    <div slot="actions" style="display: flex;justify-content:flex-end;">
+                        <md-filled-button form="dialog-button-ApplyConfig" style="margin-right:1rem">Apply</md-filled-button>
+                        
+                        <md-outlined-button form="dialog-button-ok">Send</md-outlined-button>
+                    </div>
+                </div>
+            </md-dialog>
         `;
         document.body.appendChild(form);
+
+        const configDialog = document.querySelector("md-dialog")
+        const ShowConfig = document.querySelector("#ShowConfig")
+        const DialogButton_OK = document.querySelector("md-outlined-button[form=\"dialog-button-ok\"]")
+        const DialogButton_ApplyConfig = document.querySelector("md-filled-button[form=\"dialog-button-ApplyConfig\"]")
+        ShowConfig.addEventListener("click", () => configDialog.open = true)
+        DialogButton_ApplyConfig.addEventListener("click", () => configDialog.open = false)
+        DialogButton_OK.addEventListener("click", () => {
+            configDialog.open = false
+            submitData()
+        })
 
         // === iframe 编辑器 ===
         const iframe = document.createElement("iframe");
         iframe.id = "editor-frame";
-        iframe.frameBorder = "0";
 
         // 内嵌 CSS
         const editorCSS = `
             .ql-editor, .ql-blank {
-                height: 100%;
+                flex:1;
             }
 
             body {
-                height: calc( 100vh - 64px );
+                height: calc( 100vh - 17px );
                 background-color: white;
+                display: flex;
+                flex-direction: column;
                 color: black;
             }
         `
@@ -134,10 +192,14 @@ async function run() {
         document.body.appendChild(iframe);
 
         // === 表单提交 ===
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(form);
+        //form.addEventListener('submit', async (e) => {e.preventDefault()});
+
+        async function submitData() {
+
+            const dialogConfigForm = document.querySelector("form.dialog-config-form")
+            const formData = new FormData(dialogConfigForm);
             const data = Object.fromEntries(formData.entries());
+            console.log(data)
 
             // 获取编辑器内容
             const editorDoc = iframe.contentDocument || iframe.contentWindow.document;
@@ -192,26 +254,57 @@ async function run() {
             const url = `${location.origin}/${result}${fragmentPart}`;
 
             // 弹窗显示
-            const dialog = document.createElement("dialog");
+            const dialog = document.createElement("div");
             dialog.innerHTML = `
-                <p>Your paste link:</p>
-                <input type="text" value="${url}" readonly style="width:100%;margin:0"/>
-                <button id="copy">Copy link</button>
-                <button id="close">Close</button>
+                <md-dialog id="dialog-result" open>
+                    <div slot="headline">
+                        Dialog title
+                    </div>
+                    <div slot="content"method="dialog">
+                        <p>Your paste link:</p>
+                        <input type="text" value="${url}" readonly style="width:100%;margin:0"/>
+                    </div>
+                    <div slot="actions">
+                        <md-filled-button id="copy">Copy link</md-filled-button>
+                        <md-text-button id="close">Close</md-text-button>
+                    </div>
+                </md-dialog>
             `;
             document.body.appendChild(dialog);
-            dialog.querySelector("#copy").onclick = () => navigator.clipboard.writeText(url);
-            dialog.querySelector("#close").onclick = () => dialog.close();
-            dialog.showModal();
-        });
+            const dialogResult = document.querySelector("#dialog-result")
+
+
+
+            dialog.querySelector("#copy").onclick = async () => {
+                try {
+                    await navigator.clipboard.writeText(url)
+                    const snackbar = document.createElement('mwc-snackbar');
+                    document.body.appendChild(snackbar);
+                    snackbar.labelText = 'Coppied Successfully';
+                    snackbar.open = true
+                } catch (error) {
+                    const snackbar = document.createElement('mwc-snackbar');
+                    document.body.appendChild(snackbar);
+                    snackbar.labelText = 'Failed to Copy, please try again later';
+                    const RETRY_button = document.createElement("mwc-button")
+                    RETRY_button.innerText = "RETRY"
+                    RETRY_button.onclick = () => dialog.querySelector("#copy").onclick()
+                    RETRY_button.slot = "action"
+                    snackbar.append(RETRY_button)
+                    snackbar.open = true
+                }
+            };
+            dialog.querySelector("#close").onclick = () => dialogResult.open = false;
+
+        }
 
 
     } else {
         // === 解密模式 ===
         document.body.innerHTML = "";
-        const title = document.createElement("div");
-        title.className = "title";
-        title.innerText = "Secret Post";
+        const title = document.createElement("h1");
+        title.className = "title"
+        title.innerHTML = `<img class="logo" src="${logo}"/><a href='/' style='color:white'>Hieronymus's Secret Post</a>`
         document.body.appendChild(title);
 
         let password = "";
