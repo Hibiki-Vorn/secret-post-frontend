@@ -4,7 +4,7 @@ import { encrypt } from './encrypto';
 import { decrypt } from './decrypto';
 import './style.css';
 
-const API_BASE = "http://localhost:8787";
+const API_BASE = "https://https://secret-post.3ns76ymur.workers.dev/";
 
 /** Base64URL 随机生成函数 */
 function base64url(bytes) {
