@@ -307,6 +307,25 @@ async function run() {
         title.innerHTML = `<img class="logo" src="${logo}"/><a href='/' style='color:white'>Hieronymus's Secret Post</a>`
         document.body.appendChild(title);
 
+        const form = document.createElement("div");
+        form.id = "form";
+        form.innerHTML = `
+            <div class="intro" onmouseout="document.getElementById('intro-list').hidden=true" onmouseover="document.getElementById('intro-list').hidden=false">
+                <h3 id="usage-anchor">
+                    <span>Secret Post is a secure, zero-knowledge text sharing platform.</span>
+                    <a href="/"><md-filled-button id="ShowConfig">Send your Post</md-filled-button></a>
+                    
+                </h3>
+                <ol id="intro-list" hidden anchor="usage-anchor">
+                    <li slot="headline">No registration required: generate encrypted links instantly.</li>
+                    <li slot="headline">Set expiration times or enable burn-after-read.</li>
+                    <li slot="headline">Choose your own password or let us generate one for you.</li>
+                    <li slot="headline">Completely zero-knowledge: even the server cannot read your content.</li>
+                </ol>
+            </div>
+        `
+        document.body.append(title,form);
+
         let password = "";
         const frag = window.location.hash;
         if (frag && frag.length > 1) {
