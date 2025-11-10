@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "dompurify": "^3.3.0",
+    "jsdom": "^27.1.0",
+    "quill": "^2.0.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  }
+}
