@@ -30,26 +30,45 @@ async function run() {
         document.body.innerHTML = "";
         const title = document.createElement("h1");
         title.className = "title"
-        title.innerHTML = `<img class="logo" src="${logo}"/><a href='/' style='color:white'>Hieronymus's Secret Post</a>`
+        title.innerHTML = `<img class="logo" src="${logo}"/><a href='/' style='color:white'>Secret Post</a>`
         document.body.appendChild(title);
 
         const form = document.createElement("div");
         form.id = "form";
         form.innerHTML = `
-            <div class="intro" onmouseout="document.getElementById('intro-list').hidden=true" onmouseover="document.getElementById('intro-list').hidden=false">
-                <h3 id="usage-anchor">
-                    <span>Secret Post is a secure, zero-knowledge text sharing platform.</span>
-                    <md-filled-button id="ShowConfig">Send your Post</md-filled-button>
-                </h3>
-                <ol id="intro-list" hidden anchor="usage-anchor">
-                    <li slot="headline">No registration required: generate encrypted links instantly.</li>
-                    <li slot="headline">Set expiration times or enable burn-after-read.</li>
-                    <li slot="headline">Choose your own password or let us generate one for you.</li>
-                    <li slot="headline">Completely zero-knowledge: even the server cannot read your content.</li>
-                </ol>
+            <div class="intro">
+                <md-tabs id="usage-anchor">
+                    <span id="AboutButton">
+                        <md-primary-tab>About</md-primary-tab>
+                    </span>
+                    <span id="ShowConfig">
+                        <md-primary-tab>Config</md-primary-tab>
+                    </span>
+                    <span id="button-send">
+                        <md-primary-tab>Send</md-primary-tab>
+                    </span>
+                </md-tabs>
             </div>
 
-            <md-dialog>
+            <md-dialog id="about-dialog">
+                <div slot="headline">
+                    About
+                </div>
+                <form slot="content" method="dialog">
+                    <ul id="intro-list" anchor="usage-anchor">
+                        <li slot="headline">Secret Post is a secure, zero-knowledge text sharing platform.</li>
+                        <li slot="headline">No registration required: generate encrypted links instantly.</li>
+                        <li slot="headline">Set expiration times or enable burn-after-read.</li>
+                        <li slot="headline">Choose your own password or let us generate one for you.</li>
+                        <li slot="headline">Completely zero-knowledge: even the server cannot read your content.</li>
+                    </ul>
+                </form>
+                <div slot="actions">
+                    <md-filled-button id="close-about-dialog">Close</md-filled-button>
+                </div>
+            </md-dialog>
+
+            <md-dialog id="config-dialog">
                 <div slot="headline">Config</div>
                 <div slot="content" id="config-form" method="dialog">
                     <div class="form">
@@ -88,23 +107,34 @@ async function run() {
                     </div>
                     <div slot="actions" style="display: flex;justify-content:flex-end;">
                         <md-filled-button form="dialog-button-ApplyConfig" style="margin-right:1rem">Apply</md-filled-button>
-                        
-                        <md-outlined-button form="dialog-button-ok">Send</md-outlined-button>
                     </div>
                 </div>
             </md-dialog>
         `;
         document.body.appendChild(form);
 
-        const configDialog = document.querySelector("md-dialog")
+        const aboutDialog = document.querySelector("#about-dialog")
+        const AboutButton = document.querySelector("#AboutButton")
+        const cloeAboutDialog = document.querySelector("#close-about-dialog")
+        const configDialog = document.querySelector("#config-dialog")
         const ShowConfig = document.querySelector("#ShowConfig")
-        const DialogButton_OK = document.querySelector("md-outlined-button[form=\"dialog-button-ok\"]")
+        const DialogButton_OK = document.querySelector("#button-send")
         const DialogButton_ApplyConfig = document.querySelector("md-filled-button[form=\"dialog-button-ApplyConfig\"]")
         ShowConfig.addEventListener("click", () => configDialog.open = true)
         DialogButton_ApplyConfig.addEventListener("click", () => configDialog.open = false)
         DialogButton_OK.addEventListener("click", () => {
-            configDialog.open = false
-            submitData()
+            const ButtonSend = document.querySelector("#button-send > md-primary-tab")
+            ButtonSend.innerText = "Sending..."
+            submitData().then(()=>{
+            ButtonSend.innerText = "Send"
+                configDialog.open = false
+            })
+        })
+        AboutButton.addEventListener("click", () => {
+            aboutDialog.open = true
+        })
+        cloeAboutDialog.addEventListener("click", () => {
+            aboutDialog.open = false
         })
 
         // === iframe 编辑器 ===
@@ -258,7 +288,7 @@ async function run() {
             dialog.innerHTML = `
                 <md-dialog id="dialog-result" open>
                     <div slot="headline">
-                        Dialog title
+                        URL Generated
                     </div>
                     <div slot="content"method="dialog">
                         <p>Your paste link:</p>
@@ -266,12 +296,15 @@ async function run() {
                     </div>
                     <div slot="actions">
                         <md-filled-button id="copy">Copy link</md-filled-button>
-                        <md-text-button id="close">Close</md-text-button>
+                        <md-text-button id="close-dialog-result">Close</md-text-button>
                     </div>
                 </md-dialog>
             `;
             document.body.appendChild(dialog);
             const dialogResult = document.querySelector("#dialog-result")
+            const closeDialogResult = document.querySelector("#close-dialog-result")
+            closeDialogResult.onclick = () => dialogResult.close()
+            dialogResult.addEventListener("closed", () => window.location.replace("/"))
 
 
 
@@ -294,7 +327,6 @@ async function run() {
                     snackbar.open = true
                 }
             };
-            dialog.querySelector("#close").onclick = () => dialogResult.open = false;
 
         }
 
@@ -304,51 +336,105 @@ async function run() {
         document.body.innerHTML = "";
         const title = document.createElement("h1");
         title.className = "title"
-        title.innerHTML = `<img class="logo" src="${logo}"/><a href='/' style='color:white'>Hieronymus's Secret Post</a>`
+        title.innerHTML = `<img class="logo" src="${logo}"/><a href='/' style='color:white'>Secret Post</a>`
         document.body.appendChild(title);
 
         const form = document.createElement("div");
         form.id = "form";
         form.innerHTML = `
-            <div class="intro" onmouseout="document.getElementById('intro-list').hidden=true" onmouseover="document.getElementById('intro-list').hidden=false">
-                <h3 id="usage-anchor">
-                    <span>Secret Post is a secure, zero-knowledge text sharing platform.</span>
-                    <a href="/"><md-filled-button id="ShowConfig">Send your Post</md-filled-button></a>
-                    
-                </h3>
-                <ol id="intro-list" hidden anchor="usage-anchor">
-                    <li slot="headline">No registration required: generate encrypted links instantly.</li>
-                    <li slot="headline">Set expiration times or enable burn-after-read.</li>
-                    <li slot="headline">Choose your own password or let us generate one for you.</li>
-                    <li slot="headline">Completely zero-knowledge: even the server cannot read your content.</li>
-                </ol>
+            <div class="intro">
+                <md-tabs id="usage-anchor">
+                    <span id="AboutButton">
+                        <md-primary-tab>About</md-primary-tab>
+                    </span>
+                    <span id="button-send">
+                        <a href="/">
+                            <md-primary-tab>Send your own post</md-primary-tab>
+                        </a>
+                    </span>
+                    <span>
+                        <md-primary-tab></md-primary-tab>
+                    </span>
+                </md-tabs>
             </div>
-        `
-        document.body.append(title,form);
 
-        let password = "";
+            <md-dialog id="about-dialog">
+                <div slot="headline">
+                    About
+                </div>
+                <form slot="content" method="dialog">
+                    <ul id="intro-list" anchor="usage-anchor">
+                        <li slot="headline">Secret Post is a secure, zero-knowledge text sharing platform.</li>
+                        <li slot="headline">No registration required: generate encrypted links instantly.</li>
+                        <li slot="headline">Set expiration times or enable burn-after-read.</li>
+                        <li slot="headline">Choose your own password or let us generate one for you.</li>
+                        <li slot="headline">Completely zero-knowledge: even the server cannot read your content.</li>
+                    </ul>
+                </form>
+                <div slot="actions">
+                    <md-filled-button id="close-about-dialog">Close</md-filled-button>
+                </div>
+            </md-dialog>
+
+        `
+        document.body.append(title, form);
+
+        const aboutDialog = document.querySelector("#about-dialog")
+        const AboutButton = document.querySelector("#AboutButton")
+        const closeAboutDialog = document.querySelector("#close-about-dialog")
+        AboutButton.onclick = () => aboutDialog.open = true
+        
+        closeAboutDialog.onclick = ()=>aboutDialog.open = false
+        let passwd = "";
         const frag = window.location.hash;
         if (frag && frag.length > 1) {
-            password = decodeURIComponent(frag.slice(1));
+            passwd = decodeURIComponent(frag.slice(1));
+            renderDecryptResult(passwd)
         } else {
-            password = prompt("Please enter the password:") || "";
+            const passwordInputDialogContainer = document.createElement("div")
+            passwordInputDialogContainer.innerHTML = `
+                <md-dialog id="passwd-input-dialog">
+                    <div slot="headline">
+                        Message Encrypted
+                    </div>
+                    <form slot="content" method="dialog">
+                        <md-filled-text-field id="password-input" label="Password" type="password" ></md-filled-text-field>
+                    </form>
+                    <div slot="actions">
+                        <md-outlined-button onclick="document.write('Request Canceled')">Cancel</md-outlined-button>
+                        <md-filled-button id="open-button">Decrypt</md-filled-button>
+                    </div>
+                </md-dialog>
+            `
+            document.body.append(passwordInputDialogContainer)
+            const passwordInputDialog = document.querySelector("#passwd-input-dialog")
+            passwordInputDialog.open = true
+            const openButton = document.querySelector("#open-button")
+            openButton.onclick = async () => {
+                passwd = document.querySelector("#password-input").value
+                openButton.innerText = "Decrypting..."
+                await renderDecryptResult(passwd)
+                passwordInputDialog.close()
+            }
         }
+        async function renderDecryptResult(password) {
 
-        const res = await fetch(`${API_BASE}/${key}`);
-        if (!res.ok) {
-            alert(res.status === 404 ? "Message not found or expired" : "Server error: " + res.statusText);
-            return;
-        }
 
-        const data = await res.json();
-        try {
-            const plaintext = await decrypt(data.content, password);
+            const res = await fetch(`${API_BASE}/${key}`);
+            if (!res.ok) {
+                alert(res.status === 404 ? "Message not found or expired" : "Server error: " + res.statusText);
+                return;
+            }
 
-            const iframe = document.createElement("iframe");
-            iframe.id = "editor-frame";
-            iframe.frameBorder = "0";
+            const data = await res.json();
+            try {
+                const plaintext = await decrypt(data.content, password);
 
-            const editorCSS = `
+                const iframe = document.createElement("iframe");
+                iframe.id = "editor-frame";
+                iframe.frameBorder = "0";
+
+                const editorCSS = `
                 .ql-editor, .ql-blank {
                     height: 100%;
                 }
@@ -359,24 +445,25 @@ async function run() {
                     color: black;
                 }
             `
-            iframe.srcdoc = `
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet"/>
-                    <style>${editorCSS}</style>
-                </head>
-                <body>
-                    <div class="ql-editor">${DOMPurify.sanitize(plaintext)}</div>
-                </body>
-                </html>
-            `;
-            document.body.appendChild(iframe);
-        } catch (e) {
-            console.error("Decryption error:", e);
-            alert("Decryption failed: wrong password or corrupted data");
+                iframe.srcdoc = `
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet"/>
+                            <style>${editorCSS}</style>
+                        </head>
+                        <body>
+                            <div class="ql-editor">${DOMPurify.sanitize(plaintext)}</div>
+                        </body>
+                        </html>
+                    `;
+                document.body.appendChild(iframe);
+            } catch (e) {
+                console.error("Decryption error:", e);
+                alert("Decryption failed: wrong password or corrupted data");
+            }
         }
     }
 }
