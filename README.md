@@ -40,11 +40,7 @@
 
 Example URL:
 
-```
-
 [https://secretpost.pages.dev/](https://secretpost.pages.dev/)
-
-```
 
 ---
 
