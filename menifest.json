@@ -1,0 +1,20 @@
+{
+    "name": "Hieronymus's Secret Post",
+    "short_name": "HSP",
+    "description": "A zero-knowledge encrypted paste sharing App",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#7c5cff",
+    "theme_color": "#7c5cff",
+    "lang": "en",
+    "scope": "/",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/pwa-icon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
