@@ -42,7 +42,7 @@ Example URL:
 
 ```
 
-[https://secret-post.example.com/abc123#NqVt9KfB6pYlZ2wR](https://secret-post.example.com/abc123#NqVt9KfB6pYlZ2wR)
+[https://secretpost.pages.dev/](https://secretpost.pages.dev/)
 
 ```
 
